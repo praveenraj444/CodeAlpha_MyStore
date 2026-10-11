@@ -26,7 +26,13 @@ SECRET_KEY = config('SECRET_KEY', default='dev-secret-key-change-in-prod')
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = ['*']
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://dashboard.render.com/web/srv-db5pr1vlk1mc73ar7rn0',   # ✅ உங்க Render URL
+    'localhost',
+    '127.0.0.1',]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://dashboard.render.com/web/srv-db5pr1vlk1mc73ar7rn0',
+]
 
 
 # Application definition
