@@ -1,0 +1,105 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Edit Profile — My Store{% endblock %}
+
+{% block content %}
+
+    <nav class="breadcrumb">
+        <a href="{% url 'home' %}">Home</a>
+        <span>›</span>
+        <a href="{% url 'profile_view' %}">My Profile</a>
+        <span>›</span>
+        <span class="breadcrumb-current">Edit</span>
+    </nav>
+
+    <h1 class="page-title">✏️ Edit Profile</h1>
+
+    <form method="post" novalidate class="profile-edit-form">
+        {% csrf_token %}
+
+        <div class="profile-edit-card">
+            <h2>👤 Personal Info</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ user_form.first_name.id_for_label }}">First Name</label>
+                    {{ user_form.first_name }}
+                    {% for error in user_form.first_name.errors %}
+                        <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ user_form.last_name.id_for_label }}">Last Name</label>
+                    {{ user_form.last_name }}
+                    {% for error in user_form.last_name.errors %}
+                        <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ user_form.email.id_for_label }}">Email</label>
+                {{ user_form.email }}
+                {% for error in user_form.email.errors %}
+                    <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" value="{{ user.username }}" class="form-input" disabled>
+                <small class="form-hint">Username cannot be changed.</small>
+            </div>
+        </div>
+
+        <div class="profile-edit-card">
+            <h2>📍 Contact & Address</h2>
+
+            <div class="form-group">
+                <label for="{{ profile_form.phone.id_for_label }}">Phone</label>
+                {{ profile_form.phone }}
+                {% for error in profile_form.phone.errors %}
+                    <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ profile_form.address.id_for_label }}">Address</label>
+                {{ profile_form.address }}
+                {% for error in profile_form.address.errors %}
+                    <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ profile_form.city.id_for_label }}">City</label>
+                    {{ profile_form.city }}
+                    {% for error in profile_form.city.errors %}
+                        <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ profile_form.pincode.id_for_label }}">Pincode</label>
+                    {{ profile_form.pincode }}
+                    {% for error in profile_form.pincode.errors %}
+                        <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-edit-actions">
+            <button type="submit" class="btn btn-primary">
+                💾 Save Changes
+            </button>
+            <a href="{% url 'profile_view' %}" class="btn btn-outline">
+                Cancel
+            </a>
+        </div>
+
+    </form>
+
+{% endblock %}

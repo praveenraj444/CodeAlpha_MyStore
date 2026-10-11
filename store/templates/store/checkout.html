@@ -1,0 +1,137 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Checkout — My Store{% endblock %}
+
+{% block content %}
+
+    <h1 class="page-title">📦 Checkout</h1>
+
+    <div class="checkout-layout">
+
+        <!-- ═══ LEFT: Form ═══ -->
+        <div class="checkout-form-wrapper">
+            <h2>Shipping Details</h2>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="form-error-box">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Full Name -->
+                <div class="form-group">
+                    <label for="{{ form.full_name.id_for_label }}">Full Name *</label>
+                    {{ form.full_name }}
+                    {% for error in form.full_name.errors %}
+                        <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Email + Phone (2-col) -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}">Email *</label>
+                        {{ form.email }}
+                        {% for error in form.email.errors %}
+                            <p class="form-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.phone.id_for_label }}">Phone *</label>
+                        {{ form.phone }}
+                        {% for error in form.phone.errors %}
+                            <p class="form-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div class="form-group">
+                    <label for="{{ form.address.id_for_label }}">Address *</label>
+                    {{ form.address }}
+                    {% for error in form.address.errors %}
+                        <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- City + Pincode (2-col) -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.city.id_for_label }}">City *</label>
+                        {{ form.city }}
+                        {% for error in form.city.errors %}
+                            <p class="form-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.pincode.id_for_label }}">Pincode *</label>
+                        {{ form.pincode }}
+                        {% for error in form.pincode.errors %}
+                            <p class="form-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Payment placeholder -->
+                <div class="payment-note">
+                    💳 <strong>Cash on Delivery</strong> — Payment during delivery.
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full" style="margin-top: 1rem;">
+                    🎯 Place Order (₹{{ total }})
+                </button>
+            </form>
+        </div>
+
+        <!-- ═══ RIGHT: Order Summary ═══ -->
+        <div class="checkout-summary">
+            <h2>Order Summary</h2>
+
+            <div class="checkout-items">
+                {% for item in items %}
+                    <div class="checkout-item">
+                        <div class="checkout-item-info">
+                            <span class="checkout-item-qty">{{ item.quantity }}×</span>
+                            <span class="checkout-item-name">{{ item.product.name }}</span>
+                        </div>
+                        <span class="checkout-item-price">₹{{ item.total_price }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="summary-row">
+                <span>Subtotal ({{ total_items }} items)</span>
+                <span>₹{{ subtotal }}</span>
+            </div>
+
+            <div class="summary-row">
+                <span>Shipping</span>
+                <span>
+                    {% if shipping == 0 %}
+                        <span class="free-ship">FREE</span>
+                    {% else %}
+                        ₹{{ shipping }}
+                    {% endif %}
+                </span>
+            </div>
+
+            <div class="summary-row summary-total">
+                <span>Total</span>
+                <span>₹{{ total }}</span>
+            </div>
+
+            <a href="{% url 'cart' %}" class="btn btn-outline btn-full" style="margin-top: 1rem;">
+                ← Back to Cart
+            </a>
+        </div>
+
+    </div>
+
+{% endblock %}

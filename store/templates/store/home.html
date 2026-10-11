@@ -1,0 +1,105 @@
+{% extends 'store/base.html' %}
+
+{% block title %}
+    {% if current_category %}{{ current_category.name }} — {% endif %}My Store
+{% endblock %}
+
+{% block content %}
+
+    <!-- ═══ Page Header ═══ -->
+    <div class="page-header">
+        <h1 class="page-title">
+            {% if current_category %}
+                {{ current_category.name }}
+            {% elif query %}
+                Search: "{{ query }}"
+            {% else %}
+                🛒 Our Products
+            {% endif %}
+        </h1>
+        <p class="page-subtitle">
+            {% if current_category %}
+                All {{ current_category.name }} products
+            {% else %}
+                Discover the best Avengers merch
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- ═══ Search Bar ═══ -->
+    <form method="get" action="{% url 'home' %}" class="search-form">
+        <input
+            type="text"
+            name="q"
+            placeholder="Search products..."
+            value="{{ query }}"
+            class="search-input"
+        >
+        <button type="submit" class="btn btn-primary">Search</button>
+        {% if query or current_category %}
+            <a href="{% url 'home' %}" class="btn btn-outline">Clear</a>
+        {% endif %}
+    </form>
+
+    <!-- ═══ Category Filter ═══ -->
+    <div class="category-filter">
+        <a href="{% url 'home' %}"
+           class="category-chip {% if not current_category %}active{% endif %}">
+            All
+        </a>
+        {% for cat in categories %}
+            <a href="?category={{ cat.slug }}"
+               class="category-chip {% if current_category.id == cat.id %}active{% endif %}">
+                {{ cat.name }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <!-- ═══ Product Grid ═══ -->
+    {% if products %}
+        <div class="product-grid">
+            {% for product in products %}
+                <a href="{% url 'product_detail' product.slug %}" class="product-card">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+                    {% else %}
+                        <div class="product-image-placeholder">📦</div>
+                    {% endif %}
+
+                    <div class="product-info">
+                        {% if product.category %}
+                            <span class="product-category">{{ product.category.name }}</span>
+                        {% endif %}
+
+                        <h3 class="product-name">{{ product.name }}</h3>
+
+                        <p class="product-price">₹{{ product.price }}</p>
+
+                        {% if product.stock > 0 %}
+                            <span class="product-stock">✅ In stock ({{ product.stock }})</span>
+                        {% else %}
+                            <span class="product-stock out-of-stock">❌ Out of stock</span>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- ═══ Empty State ═══ -->
+        <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h2>No products found</h2>
+            <p>
+                {% if query %}
+                    "{{ query }}"-க்கு எந்த product-ம் இல்ல.
+                {% elif current_category %}
+                    இந்த category-ல products இல்ல.
+                {% else %}
+                    இன்னும் products add ஆகல.
+                {% endif %}
+            </p>
+            <a href="{% url 'home' %}" class="btn btn-primary">Back to all products</a>
+        </div>
+    {% endif %}
+
+{% endblock %}

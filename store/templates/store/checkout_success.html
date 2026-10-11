@@ -1,0 +1,80 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Order Placed — My Store{% endblock %}
+
+{% block content %}
+
+    <div class="success-container">
+
+        <!-- ═══ Success Icon ═══ -->
+        <div class="success-icon">🎉</div>
+
+        <h1 class="success-title">Order Placed Successfully!</h1>
+        <p class="success-subtitle">
+            Thank you, <strong>{{ order.full_name }}</strong>! உங்க order confirm ஆகிடுச்சு.
+        </p>
+
+        <!-- ═══ Order Info ═══ -->
+        <div class="success-card">
+            <div class="success-row">
+                <span>Order ID</span>
+                <strong>#{{ order.id }}</strong>
+            </div>
+            <div class="success-row">
+                <span>Placed on</span>
+                <strong>{{ order.created_at|date:"M d, Y — H:i" }}</strong>
+            </div>
+            <div class="success-row">
+                <span>Status</span>
+                <span class="status-badge status-{{ order.status }}">
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+            <div class="success-row">
+                <span>Payment</span>
+                <strong>Cash on Delivery</strong>
+            </div>
+        </div>
+
+        <!-- ═══ Items ═══ -->
+        <div class="success-card">
+            <h3 class="success-card-title">Items</h3>
+
+            {% for item in order.items.all %}
+                <div class="success-item">
+                    <div>
+                        <strong>{{ item.product_name }}</strong>
+                        <span class="success-item-qty">× {{ item.quantity }}</span>
+                    </div>
+                    <span>₹{{ item.total_price }}</span>
+                </div>
+            {% endfor %}
+
+            <div class="success-total">
+                <span>Total Paid</span>
+                <strong>₹{{ order.total_amount }}</strong>
+            </div>
+        </div>
+
+        <!-- ═══ Shipping Address ═══ -->
+        <div class="success-card">
+            <h3 class="success-card-title">Shipping Address</h3>
+            <p class="success-address">
+                {{ order.full_name }}<br>
+                {{ order.address }}<br>
+                {{ order.city }} — {{ order.pincode }}<br>
+                📞 {{ order.phone }}<br>
+                ✉️ {{ order.email }}
+            </p>
+        </div>
+
+        <!-- ═══ Actions ═══ -->
+        <div class="success-actions">
+            <a href="{% url 'home' %}" class="btn btn-primary">
+                🛒 Continue Shopping
+            </a>
+        </div>
+
+    </div>
+
+{% endblock %}

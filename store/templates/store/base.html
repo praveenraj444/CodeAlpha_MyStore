@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Avengers Cart{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'store/css/style.css' %}">
+</head>
+<body>
+
+    <!-- ═══ NAVBAR ═══ -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'home' %}" class="nav-logo">
+              🛒 My Store
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}">Home</a></li>
+
+                {% if user.is_authenticated %}
+                    <li>
+                          <a href="{% url 'cart' %}" class="cart-link">
+                             🛒 Cart
+                             {% if cart_count > 0 %}
+                                <span class="cart-badge">{{ cart_count }}</span>
+                             {% endif %}
+                          </a>
+                    </li>
+                    <li class="nav-dropdown">
+                        <a href="#" class="nav-user nav-dropdown-toggle" onclick="return false;">
+                           👤 {{ user.username }} ▾
+                        </a>
+                     <ul class="nav-dropdown-menu">
+                          <li><a href="{% url 'profile_view' %}">👤 My Profile</a></li>
+                          <li><a href="{% url 'order_history' %}">📦 My Orders</a></li>
+                          <li><a href="{% url 'password_change' %}">🔒 Change Password</a></li>
+                          <li><a href="{% url 'logout' %}">🚪 Logout</a></li>
+                     </ul>
+                    </li>
+                {% else %}
+                    <li>
+                          <a href="{% url 'cart' %}" class="cart-link">
+                             🛒 Cart
+                             {% if cart_count > 0 %}
+                                <span class="cart-badge">{{ cart_count }}</span>
+                             {% endif %}
+                          </a>
+                    </li>
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                    <li><a href="{% url 'register' %}" class="btn-register">Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ═══ MESSAGES ═══ -->
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>© 2026 My Store. Built with Django.</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'store/js/script.js' %}"></script>
+</body>
+</html>

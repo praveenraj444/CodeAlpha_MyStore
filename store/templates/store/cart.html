@@ -1,0 +1,128 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Cart — My Store{% endblock %}
+
+{% block content %}
+
+    <h1 class="page-title">🛒 Your Cart</h1>
+
+    {% if is_empty %}
+        <!-- ═══ EMPTY CART ═══ -->
+        <div class="empty-state">
+            <div class="empty-icon">🛒</div>
+            <h2>Your cart is empty</h2>
+            <p>Products add பண்ணி shopping ஆரம்பிங்க!</p>
+            <a href="{% url 'home' %}" class="btn btn-primary">Start Shopping</a>
+        </div>
+
+    {% else %}
+        <!-- ═══ CART TABLE ═══ -->
+        <div class="cart-layout">
+
+            <!-- Left: Items -->
+            <div class="cart-items">
+                <div class="cart-header">
+                    <span>{{ total_items }} item{{ total_items|pluralize }}</span>
+                </div>
+
+                {% for item in items %}
+                    <div class="cart-item">
+                        <!-- Image -->
+                        <a href="{% url 'product_detail' item.product.slug %}" class="cart-item-image">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                            {% else %}
+                                <div class="cart-image-placeholder">📦</div>
+                            {% endif %}
+                        </a>
+
+                        <!-- Info -->
+                        <div class="cart-item-info">
+                            {% if item.product.category %}
+                                <span class="product-category">{{ item.product.category.name }}</span>
+                            {% endif %}
+                            <a href="{% url 'product_detail' item.product.slug %}" class="cart-item-name">
+                                {{ item.product.name }}
+                            </a>
+                            <p class="cart-item-price">₹{{ item.product.price }}</p>
+                        </div>
+
+                        <!-- Quantity Form -->
+                        <form method="post" action="{% url 'update_cart' item.product.id %}" class="cart-item-qty">
+                            {% csrf_token %}
+                            <input
+                                type="number"
+                                name="quantity"
+                                value="{{ item.quantity }}"
+                                min="1"
+                                max="{{ item.product.stock }}"
+                                onchange="this.form.submit()"
+                            >
+                            <noscript>
+                                <button type="submit" class="btn btn-outline">Update</button>
+                            </noscript>
+                        </form>
+
+                        <!-- Total -->
+                        <div class="cart-item-total">
+                            ₹{{ item.total_price }}
+                        </div>
+
+                        <!-- Remove -->
+                        <a href="{% url 'remove_from_cart' item.product.id %}" class="cart-remove" title="Remove">
+                            ✕
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Right: Summary -->
+            <div class="cart-summary">
+                <h2>Order Summary</h2>
+
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>₹{{ subtotal }}</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span>
+                        {% if subtotal >= 999 %}
+                            <span class="free-ship">FREE</span>
+                        {% else %}
+                            ₹99
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="summary-row summary-total">
+                    <span>Total</span>
+                    <span>
+                        {% if subtotal >= 999 %}
+                            ₹{{ subtotal }}
+                        {% else %}
+                            ₹{{ subtotal|add:99 }}
+                        {% endif %}
+                    </span>
+                </div>
+
+                <a href="{% url 'checkout' %}" class="btn btn-primary btn-full" style="margin-top: 1rem;">
+                    Proceed to Checkout →
+                </a>
+
+                <a href="{% url 'home' %}" class="btn btn-outline btn-full" style="margin-top: 0.6rem;">
+                    ← Continue Shopping
+                </a>
+
+                {% if subtotal < 999 %}
+                    <p class="ship-note">
+                        💡 ₹{{ 999|add:0 }}+ orders-க்கு free shipping!
+                    </p>
+                {% endif %}
+            </div>
+
+        </div>
+    {% endif %}
+
+{% endblock %}

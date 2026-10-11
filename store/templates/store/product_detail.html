@@ -1,0 +1,237 @@
+{% extends 'store/base.html' %}
+
+{% block title %}{{ product.name }} — My Store{% endblock %}
+
+{% block content %}
+
+    <!-- ═══ Breadcrumb ═══ -->
+    <nav class="breadcrumb">
+        <a href="{% url 'home' %}">Home</a>
+        <span>›</span>
+        {% if product.category %}
+            <a href="{% url 'home' %}?category={{ product.category.slug }}">
+                {{ product.category.name }}
+            </a>
+            <span>›</span>
+        {% endif %}
+        <span class="breadcrumb-current">{{ product.name }}</span>
+    </nav>
+
+    <!-- ═══ Product Detail Layout ═══ -->
+    <div class="product-detail">
+
+        <!-- ── Left: Image ── -->
+        <div class="product-detail-image">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+                <div class="product-image-placeholder detail-placeholder">📦</div>
+            {% endif %}
+        </div>
+
+        <!-- ── Right: Info ── -->
+        <div class="product-detail-info">
+
+            {% if product.category %}
+                <span class="product-category">{{ product.category.name }}</span>
+            {% endif %}
+
+            <h1 class="product-detail-name">{{ product.name }}</h1>
+
+<!-- ⭐ Average Rating -->
+{% if product.review_count > 0 %}
+    <div class="rating-summary">
+        <span class="rating-stars">
+            {% for i in "12345" %}
+                {% if forloop.counter <= product.average_rating %}⭐{% else %}☆{% endif %}
+            {% endfor %}
+        </span>
+        <span class="rating-text">
+            {{ product.average_rating }} / 5 ({{ product.review_count }} review{{ product.review_count|pluralize }})
+        </span>
+    </div>
+{% else %}
+    <p class="no-reviews">No reviews yet. Be the first to review this product!</p>
+{% endif %}
+
+<p class="product-detail-price">₹{{ product.price }}</p>
+
+            <!-- Stock Status -->
+            <div class="stock-badge">
+                {% if product.stock > 0 %}
+                    <span class="stock-in">✅ In Stock ({{ product.stock }} available)</span>
+                {% else %}
+                    <span class="stock-out">❌ Out of Stock</span>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            <div class="product-detail-description">
+                <h3>Description</h3>
+                <p>{{ product.description|default:"No description available." }}</p>
+            </div>
+
+            <!-- Add to Cart Form -->
+            {% if product.stock > 0 %}
+                <form method="post" action="{% url 'add_to_cart' product.id %}" class="add-to-cart-form">
+                    {% csrf_token %}
+
+                    <div class="quantity-selector">
+                        <label>Quantity:</label>
+                        <div class="qty-controls">
+                            <button type="button" id="qty-minus" class="qty-btn">−</button>
+                            <input
+                                type="number"
+                                name="quantity"
+                                id="quantity"
+                                value="1"
+                                min="1"
+                                max="{{ product.stock }}"
+                                readonly
+                            >
+                            <button type="button" id="qty-plus" class="qty-btn">+</button>
+                        </div>
+                    </div>
+
+                    <div class="detail-actions">
+    <button type="submit" name="add" value="1" class="btn btn-primary btn-full">
+        🛒 Add to Cart
+    </button>
+    <button type="submit" name="buy_now" value="1" class="btn btn-secondary btn-full">
+        ⚡ Buy Now
+    </button>
+</div>
+                </form>
+            {% else %}
+                <button class="btn btn-secondary btn-full" disabled>
+                    ❌ Out of Stock
+                </button>
+            {% endif %}
+
+            <!-- Extra Info -->
+            <div class="product-meta">
+                <p>🚚 Free shipping on orders above ₹999</p>
+                <p>↩️ 7-day easy returns</p>
+                <p>🔒 Secure checkout</p>
+            </div>
+
+        </div>
+    </div>
+
+        <!-- ═══ REVIEWS SECTION ═══ -->
+    <section class="reviews-section">
+        <h2 class="section-title">Customer Reviews</h2>
+
+        <div class="reviews-layout">
+
+            <!-- ── LEFT: Reviews List ── -->
+            <div class="reviews-list">
+                {% if reviews %}
+                    {% for review in reviews %}
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div class="review-user">
+                                    <span class="review-avatar">
+                                        {{ review.user.username|first|upper }}
+                                    </span>
+                                    <div>
+                                        <strong>{{ review.user.username }}</strong>
+                                        <span class="review-date">{{ review.created_at|date:"M d, Y" }}</span>
+                                    </div>
+                                </div>
+                                <div class="review-stars">{% for i in "12345" %}{% if forloop.counter <= review.rating %}⭐{% else %}☆{% endif %}{% endfor %}</div>
+                            </div>
+
+                            {% if review.comment %}
+                                <p class="review-comment">{{ review.comment }}</p>
+                            {% endif %}
+
+                            {% if review.user == user %}
+                                <div class="review-actions">
+                                    <a href="{% url 'delete_review' review.id %}"
+                                       class="review-delete"
+                                       onclick="return confirm('Review delete பண்ணணுமா?')">
+                                        🗑️ Delete
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-reviews-box">
+                        <p>There are no reviews for this product yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- ── RIGHT: Review Form ── -->
+            <div class="review-form-wrapper">
+                <h3>{% if user_review %}Update Your Review{% else %}Write a Review{% endif %}</h3>
+
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'submit_review' product.slug %}">
+                        {% csrf_token %}
+
+                        <div class="form-group">
+                            <label>{{ review_form.rating.label }}</label>
+                            <div class="rating-radios">
+                                {% for radio in review_form.rating %}
+                                    <label class="rating-radio">
+                                       <input type="radio"
+                                              name="rating"
+                                              value="{{ radio.data.value }}"
+                                              {% if user_review and user_review.rating == radio.data.value %}checked{% endif %} 
+                                              required>
+                                       <span>{{ radio.choice_label }}</span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>{{ review_form.comment.label }}</label>
+                              <textarea name="comment"
+                                         class="form-input"
+                                         rows="3"
+                                         placeholder="Share your experience...">{% if user_review %}{{ user_review.comment }}{% endif %}</textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full">
+                            {% if user_review %}Update Review{% else %}Submit Review{% endif %}
+                        </button>
+                    </form>
+                {% else %}
+                    <p class="login-prompt">
+                        Please <a href="{% url 'login' %}?next={{ request.path }}">Login</a> to write a review.
+                    </p>
+                {% endif %}
+            </div>
+
+        </div>
+    </section>
+    <!-- ═══ Related Products ═══ -->
+    {% if related_products %}
+        <section class="related-section">
+            <h2 class="section-title">You may also like</h2>
+            <div class="product-grid">
+                {% for rp in related_products %}
+                    <a href="{% url 'product_detail' rp.slug %}" class="product-card">
+                        {% if rp.image %}
+                            <img src="{{ rp.image.url }}" alt="{{ rp.name }}" class="product-image">
+                        {% else %}
+                            <div class="product-image-placeholder">📦</div>
+                        {% endif %}
+                        <div class="product-info">
+                            {% if rp.category %}
+                                <span class="product-category">{{ rp.category.name }}</span>
+                            {% endif %}
+                            <h3 class="product-name">{{ rp.name }}</h3>
+                            <p class="product-price">₹{{ rp.price }}</p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
+{% endblock %}

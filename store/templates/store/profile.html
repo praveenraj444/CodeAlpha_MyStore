@@ -1,0 +1,122 @@
+{% extends 'store/base.html' %}
+
+{% block title %}My Profile — My Store{% endblock %}
+
+{% block content %}
+
+    <div class="profile-header">
+        <div class="profile-avatar-lg">
+            {{ user.username|first|upper }}
+        </div>
+        <div class="profile-header-info">
+            <h1>{{ user.get_full_name|default:user.username }}</h1>
+            <p>@{{ user.username }}</p>
+            <p class="profile-joined">Member since {{ user.date_joined|date:"M Y" }}</p>
+        </div>
+        <div class="profile-header-actions">
+            <a href="{% url 'profile_edit' %}" class="btn btn-primary">✏️ Edit Profile</a>
+            <a href="{% url 'password_change' %}" class="btn btn-outline">🔒 Change Password</a>
+        </div>
+    </div>
+
+    <!-- ═══ Stats ═══ -->
+    <div class="profile-stats">
+        <div class="stat-card">
+            <span class="stat-icon">📦</span>
+            <span class="stat-value">{{ total_orders }}</span>
+            <span class="stat-label">Orders</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon">💰</span>
+            <span class="stat-value">₹{{ total_spent }}</span>
+            <span class="stat-label">Total Spent</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon">⭐</span>
+            <span class="stat-value">{{ review_count }}</span>
+            <span class="stat-label">Reviews</span>
+        </div>
+    </div>
+
+    <!-- ═══ Profile Info ═══ -->
+    <div class="profile-grid">
+        <div class="profile-card">
+            <h2>📞 Contact Info</h2>
+            <div class="profile-row">
+                <span>Email</span>
+                <strong>{{ user.email|default:"Not set" }}</strong>
+            </div>
+            <div class="profile-row">
+                <span>Phone</span>
+                <strong>{{ profile.phone|default:"Not set" }}</strong>
+            </div>
+        </div>
+
+        <div class="profile-card">
+            <h2>📍 Default Address</h2>
+            {% if profile.address %}
+                <p class="profile-address">
+                    {{ profile.address }}<br>
+                    {% if profile.city %}{{ profile.city }}{% endif %}
+                    {% if profile.pincode %} — {{ profile.pincode }}{% endif %}
+                </p>
+            {% else %}
+                <p class="profile-empty">No address added yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ═══ Recent Orders ═══ -->
+    <div class="profile-section">
+        <div class="profile-section-header">
+            <h2>📦 Recent Orders</h2>
+            {% if total_orders > 0 %}
+                <a href="{% url 'order_history' %}" class="btn-link">View All →</a>
+            {% endif %}
+        </div>
+
+        {% if recent_orders %}
+            <div class="orders-list">
+                {% for order in recent_orders %}
+                    <a href="{% url 'order_detail' order.id %}" class="order-card">
+                        <div class="order-card-header">
+                            <div>
+                                <span class="order-id">Order #{{ order.id }}</span>
+                                <span class="order-date">{{ order.created_at|date:"M d, Y" }}</span>
+                            </div>
+                            <span class="status-badge status-{{ order.status }}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </div>
+                        <div class="order-card-body">
+                            <div class="order-items-preview">
+                                {% for item in order.items.all|slice:":2" %}
+                                    <span class="order-item-chip">
+                                        {{ item.product_name }} × {{ item.quantity }}
+                                    </span>
+                                {% endfor %}
+                                {% if order.items.count > 2 %}
+                                    <span class="order-item-chip more">
+                                        +{{ order.items.count|add:"-2" }} more
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <div class="order-card-total">
+                                <span>Total</span>
+                                <strong>₹{{ order.total_amount }}</strong>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <h3>No orders yet</h3>
+                <p>Start shopping to see your orders here.</p>
+                <a href="{% url 'home' %}" class="btn btn-primary">Shop Now</a>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
