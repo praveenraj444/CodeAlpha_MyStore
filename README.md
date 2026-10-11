@@ -226,7 +226,7 @@ Production-ready with:
 
 **Praveen Raj**
 - GitHub: [@praveenraj444](https://github.com/praveenraj444)
-- LinkedIn: (linkedin.com/in/praveenraj-m-432aa2386)
+- LinkedIn: linkedin.com/in/praveenraj-m-432aa2386
 - Email: (praveenrajm2021@gmail.com)
 
 ---
