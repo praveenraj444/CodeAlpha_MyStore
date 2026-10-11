@@ -106,8 +106,8 @@ pip install -r requirements.txt
 # 4. Run migrations
 python manage.py migrate
 
-# 5. Seed sample products (optional)
-python manage.py seed_products
+# 5. Seed sample products (downloads images automatically)
+python manage.py seed_products --clear
 
 # 6. Create superuser (admin)
 python manage.py createsuperuser
@@ -115,6 +115,8 @@ python manage.py createsuperuser
 # 7. Run development server
 python manage.py runserver
 ```
+> 💡 **Note:** Product images are downloaded automatically when you run `seed_products`. Media files are not committed to the repository to keep the repo size small.
+
 
 **Visit:** http://127.0.0.1:8000/
 
