@@ -38,3 +38,5 @@ desktop.ini
 .coverage
 htmlcov/
 .pytest_cache/
+# Media files
+/media/

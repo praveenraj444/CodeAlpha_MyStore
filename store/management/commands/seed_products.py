@@ -1,3 +1,6 @@
+import urllib.request
+from io import BytesIO
+from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 from store.models import Category, Product
@@ -11,6 +14,48 @@ CATEGORIES = [
     "Shoes",
     "Bags",
 ]
+
+# ═══════════════════════════════════════════
+# CURATED PRODUCT IMAGES (Pexels CDN — free, no API)
+# ═══════════════════════════════════════════
+# ஒவ்வொரு product-க்கும் specific image URL
+PRODUCT_IMAGES = {
+    # ── T-Shirts ──
+    "classic-white-cotton-t-shirt": "https://images.pexels.com/photos/8532616/pexels-photo-8532616.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "black-graphic-print-t-shirt": "https://images.pexels.com/photos/9558577/pexels-photo-9558577.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "navy-blue-polo-t-shirt": "https://images.pexels.com/photos/7697497/pexels-photo-7697497.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "grey-melange-round-neck": "https://images.pexels.com/photos/428340/pexels-photo-428340.jpeg?auto=compress&cs=tinysrgb&w=600",
+
+    # ── Shirts ──
+    "white-formal-shirt": "https://images.pexels.com/photos/297933/pexels-photo-297933.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "blue-checked-casual-shirt": "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "black-denim-shirt": "https://images.pexels.com/photos/6770028/pexels-photo-6770028.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "olive-green-linen-shirt": "https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=600",
+
+    # ── Chains ──
+    "gold-plated-cuban-chain": "https://images.pexels.com/photos/1191531/pexels-photo-1191531.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "silver-figaro-chain-necklace": "https://images.pexels.com/photos/1721558/pexels-photo-1721558.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "black-matte-rope-chain": "https://images.pexels.com/photos/1191530/pexels-photo-1191530.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "rose-gold-pendant-chain": "https://images.pexels.com/photos/1454171/pexels-photo-1454171.jpeg?auto=compress&cs=tinysrgb&w=600",
+
+    # ── Watches ──
+    "classic-analog-leather-watch": "https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "digital-sports-watch": "https://images.pexels.com/photos/277390/pexels-photo-277390.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "stainless-steel-chronograph": "https://images.pexels.com/photos/1697214/pexels-photo-1697214.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "smart-fitness-watch": "https://images.pexels.com/photos/393047/pexels-photo-393047.jpeg?auto=compress&cs=tinysrgb&w=600",
+
+    # ── Shoes ──
+    "white-running-sneakers": "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "brown-leather-formal-shoes": "https://images.pexels.com/photos/267320/pexels-photo-267320.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "black-canvas-sneakers": "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "sports-running-shoes": "https://images.pexels.com/photos/2048548/pexels-photo-2048548.jpeg?auto=compress&cs=tinysrgb&w=600",
+
+    # ── Bags ──
+    "black-leather-laptop-bag": "https://images.pexels.com/photos/904350/pexels-photo-904350.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "canvas-casual-backpack": "https://images.pexels.com/photos/2905238/pexels-photo-2905238.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "travel-duffel-bag": "https://images.pexels.com/photos/1280064/pexels-photo-1280064.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "mini-crossbody-sling-bag": "https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=600",
+}
 
 
 PRODUCTS = [
@@ -246,6 +291,29 @@ class Command(BaseCommand):
                     'available': True,
                 }
             )
+
+            # ═══ ATTACH IMAGE ═══
+            if not product.image:
+                img_url = PRODUCT_IMAGES.get(slug)
+                if img_url:
+                    try:
+                        req = urllib.request.Request(
+                            img_url,
+                            headers={'User-Agent': 'Mozilla/5.0'}    # Pexels blocks default UA
+                        )
+                        with urllib.request.urlopen(req, timeout=15) as response:
+                            img_data = response.read()
+
+                        product.image.save(
+                            f"{slug}.jpg",
+                            ContentFile(img_data),
+                            save=True
+                        )
+                        self.stdout.write(self.style.SUCCESS(f'    📷 Image attached'))
+                    except Exception as e:
+                        self.stdout.write(self.style.WARNING(f'    ⚠️  Image failed: {e}'))
+                else:
+                    self.stdout.write(self.style.WARNING(f'    ⚠️  No image URL for: {slug}'))
 
             if created:
                 created_count += 1
